@@ -56,27 +56,20 @@ def monitor_memory_usage_during_training():
 memory_thread = Thread(target=monitor_memory_usage_during_training)
 memory_thread.daemon = True
 
-# Load and prepare data
-splits = {'train': 'train.jsonl', 'test': 'test.jsonl'}
-df_train = pd.read_json("hf://datasets/stanfordnlp/imdb/train", lines=True)
-df_test  = pd.read_json("hf://datasets/stanfordnlp/imdb/test", lines=True)
+# Load IMDb dataset directly
+dataset = load_dataset("stanfordnlp/imdb")
 
-df_train, df_val = train_test_split(
-    df_train,
-    test_size=0.2,
-    random_state=67
-)
+# Create validation split from train
+train_val = dataset["train"].train_test_split(test_size=0.2, seed=67)
+train_dataset = train_val["train"]
+eval_dataset = train_val["test"]
+test_dataset = dataset["test"]
 
-# Convert pandas DataFrames to Hugging Face datasets
-train_dataset = Dataset.from_pandas(df_train)
-eval_dataset = Dataset.from_pandas(df_val)
-test_dataset = Dataset.from_pandas(df_test)
-
-# Create DatasetDict
+# Wrap into DatasetDict for consistency
 dataset = DatasetDict({
-    'train': train_dataset,
-    'validation': eval_dataset,
-    'test': test_dataset
+    "train": train_dataset,
+    "validation": eval_dataset,
+    "test": test_dataset
 })
 
 # Tokenization
@@ -283,9 +276,6 @@ print(f"\nResults saved to 'training_results_detailed.json'")
 print(f"Final Test Accuracy: {test_accuracy*100:.2f}%")
 print(f"Peak GPU Memory DURING TRAINING: {peak_gpu_memory_during_training:.2f} GB")
 print(f"Peak RAM Usage DURING TRAINING: {peak_ram_usage_during_training:.2f} GB")
-
-
-
 
 with open(f'./{results_dir}/gpu_usage_log.json', 'w') as f:
     json.dump(gpu_usage_log, f)
