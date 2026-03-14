@@ -1,0 +1,85 @@
+{
+  "best_global_step": 625,
+  "best_metric": 0.22419512271881104,
+  "best_model_checkpoint": "././results/deberta-v3-small-lora/checkpoint-625",
+  "epoch": 1.0,
+  "eval_steps": 500,
+  "global_step": 625,
+  "is_hyper_param_search": false,
+  "is_local_process_zero": true,
+  "is_world_process_zero": true,
+  "log_history": [
+    {
+      "epoch": 0.16,
+      "grad_norm": 4.93366003036499,
+      "learning_rate": 8.416000000000001e-05,
+      "loss": 0.6264,
+      "step": 100
+    },
+    {
+      "epoch": 0.32,
+      "grad_norm": 5.231466770172119,
+      "learning_rate": 6.816e-05,
+      "loss": 0.3118,
+      "step": 200
+    },
+    {
+      "epoch": 0.48,
+      "grad_norm": 2.1227223873138428,
+      "learning_rate": 5.2159999999999995e-05,
+      "loss": 0.2671,
+      "step": 300
+    },
+    {
+      "epoch": 0.64,
+      "grad_norm": 10.25118637084961,
+      "learning_rate": 3.616e-05,
+      "loss": 0.2519,
+      "step": 400
+    },
+    {
+      "epoch": 0.8,
+      "grad_norm": 3.213198184967041,
+      "learning_rate": 2.016e-05,
+      "loss": 0.2415,
+      "step": 500
+    },
+    {
+      "epoch": 0.96,
+      "grad_norm": 1.5074272155761719,
+      "learning_rate": 4.16e-06,
+      "loss": 0.2306,
+      "step": 600
+    },
+    {
+      "epoch": 1.0,
+      "eval_accuracy": 0.9132,
+      "eval_loss": 0.22419512271881104,
+      "eval_runtime": 51.5198,
+      "eval_samples_per_second": 97.05,
+      "eval_steps_per_second": 3.047,
+      "step": 625
+    }
+  ],
+  "logging_steps": 100,
+  "max_steps": 625,
+  "num_input_tokens_seen": 0,
+  "num_train_epochs": 1,
+  "save_steps": 500,
+  "stateful_callbacks": {
+    "TrainerControl": {
+      "args": {
+        "should_epoch_stop": false,
+        "should_evaluate": false,
+        "should_log": false,
+        "should_save": true,
+        "should_training_stop": true
+      },
+      "attributes": {}
+    }
+  },
+  "total_flos": 1345672212480000.0,
+  "train_batch_size": 32,
+  "trial_name": null,
+  "trial_params": null
+}

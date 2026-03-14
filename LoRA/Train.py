@@ -7,7 +7,7 @@ from transformers import TrainingArguments, Trainer
 import numpy as np
 import pandas as pd
 import os
-from datasets import Dataset, DatasetDict
+from datasets import load_dataset, Dataset, DatasetDict
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 import psutil
