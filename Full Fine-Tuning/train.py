@@ -1,6 +1,5 @@
 # Import Libraries
 from transformers import DebertaV2Tokenizer, DebertaV2ForSequenceClassification, DataCollatorWithPadding
-from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 import torch
 import random
 from transformers import TrainingArguments, Trainer
@@ -81,27 +80,14 @@ def tokenize_function(examples):
 
 tokenized_datasets = dataset.map(tokenize_function, batched=True)
 
-# Load the Pretrained Model
+# ================= FULL FINE-TUNING =================
+# Load the Pretrained Model WITHOUT LoRA – all parameters will be trained
 model = DebertaV2ForSequenceClassification.from_pretrained("microsoft/deberta-v3-small", num_labels=2)
 
-lora_config = LoraConfig(
-    r=8,
-    lora_alpha=16,
-    target_modules=["query_proj", "key_proj", "value_proj",
-        "output.dense",
-        "intermediate.dense",
-        "pooler.dense", "classifier"
-],
-    lora_dropout=0.1
-)
-
-model = prepare_model_for_kbit_training(model)
-model = get_peft_model(model, lora_config)
-model.print_trainable_parameters()
-
-for name, param in model.named_parameters():
-    if "lora" in name:
-        print(name)
+# (Optional) Verify that all parameters are trainable
+print("Total parameters:", sum(p.numel() for p in model.parameters()))
+print("Trainable parameters:", sum(p.numel() for p in model.parameters() if p.requires_grad))
+# =====================================================
 
 # Fix dataset variable names
 train_dataset = tokenized_datasets["train"]
@@ -121,11 +107,11 @@ def compute_metrics(eval_pred):
     predictions = np.argmax(predictions, axis=1)
     return {'accuracy': accuracy_score(labels, predictions)}
 
-# Training arguments
+# Training arguments – note the lower learning rate for full fine-tuning
 training_args = TrainingArguments(
-    output_dir=f"./{results_dir}/deberta-v3-small-lora",
-    learning_rate=1e-4,
-    per_device_train_batch_size=16,
+    output_dir=f"./{results_dir}/deberta-v3-small-full",
+    learning_rate=2e-5,                     # typical for full fine-tuning (was 1e-4 for LoRA)
+    per_device_train_batch_size=16,          # reduce if you encounter OOM
     per_device_eval_batch_size=16,
     num_train_epochs=1,
     weight_decay=0.01,
@@ -134,13 +120,10 @@ training_args = TrainingArguments(
     load_best_model_at_end=True,
     metric_for_best_model="loss",
     greater_is_better=False,
-    # logging_dir="./logs",
     logging_steps=100,
-    # report_to="None",  # Disable wandb/tensorboard if not needed
-    fp16=torch.cuda.is_available(),
+    fp16=torch.cuda.is_available(),          # mixed precision helps memory/speed
     dataloader_pin_memory=False,
 )
-
 
 # Create trainer
 trainer = Trainer(
@@ -186,7 +169,8 @@ with open(f'./{results_dir}/log.json', 'w') as f:
     json.dump(log, f, indent=2)
 
 # Save the model
-trainer.save_model(f"./{results_dir}/deberta-v3-small-lora")
+trainer.save_model(f"./{results_dir}/deberta-v3-small-full")
+
 # Evaluate on validation set
 print("Evaluating on validation set...")
 val_results = trainer.evaluate(eval_dataset=eval_dataset)
