@@ -1,8 +1,7 @@
 # Import Libraries
-from transformers import DebertaV2Tokenizer, DebertaV2ForSequenceClassification, DataCollatorWithPadding
+from transformers import DebertaV2Tokenizer, DebertaV2ForSequenceClassification, DataCollatorWithPadding, TrainingArguments, Trainer
 import torch
 import random
-from transformers import TrainingArguments, Trainer
 import numpy as np
 import pandas as pd
 import os
