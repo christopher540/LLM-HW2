@@ -80,14 +80,11 @@ def tokenize_function(examples):
 
 tokenized_datasets = dataset.map(tokenize_function, batched=True)
 
-# ================= FULL FINE-TUNING =================
 # Load the Pretrained Model WITHOUT LoRA – all parameters will be trained
 model = DebertaV2ForSequenceClassification.from_pretrained("microsoft/deberta-v3-small", num_labels=2)
 
-# (Optional) Verify that all parameters are trainable
 print("Total parameters:", sum(p.numel() for p in model.parameters()))
 print("Trainable parameters:", sum(p.numel() for p in model.parameters() if p.requires_grad))
-# =====================================================
 
 # Fix dataset variable names
 train_dataset = tokenized_datasets["train"]
@@ -110,8 +107,8 @@ def compute_metrics(eval_pred):
 # Training arguments – note the lower learning rate for full fine-tuning
 training_args = TrainingArguments(
     output_dir=f"./{results_dir}/deberta-v3-small-full",
-    learning_rate=2e-5,                     # typical for full fine-tuning (was 1e-4 for LoRA)
-    per_device_train_batch_size=16,          # reduce if you encounter OOM
+    learning_rate=2e-5,                     
+    per_device_train_batch_size=16,          
     per_device_eval_batch_size=16,
     num_train_epochs=1,
     weight_decay=0.01,
@@ -121,7 +118,7 @@ training_args = TrainingArguments(
     metric_for_best_model="loss",
     greater_is_better=False,
     logging_steps=100,
-    fp16=torch.cuda.is_available(),          # mixed precision helps memory/speed
+    fp16=torch.cuda.is_available(),         
     dataloader_pin_memory=False,
 )
 
